@@ -7,7 +7,7 @@
     </head>
     <body>
         <div style="margin-bottom: 10px">
-            <input id="gameid" type="text" placeholder="Game ID" value="nraboy" />
+            <input id="gameid" type="text" placeholder="Game ID" />
             <button id="creategame" type="button" onclick="joinOrCreateGame()">Create / Join</button>
         </div>
         <div id="game"></div>
@@ -22,9 +22,13 @@
             });
 
             async function joinOrCreateGame() {
+                if(!document.getElementById("gameid").value || document.getElementById("gameid").value == "") {
+                    return alert("The Game ID Must Not Be Empty");
+                }
                 try {
                     let auth = await game.authenticate();
                     game.joinOrCreateGame(document.getElementById("gameid").value, auth.id);
+                    document.getElementById("creategame").disabled = true;
                 } catch (e) {
                     console.error(e);
                 }
