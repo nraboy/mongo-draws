@@ -24,6 +24,7 @@ class Game {
         this.collection = data.collection;
         this.authId = data.authId;
         this.gameId = data.gameId;
+        this.ownerId = data.ownerId;
         this.strokes = data.strokes;
         this.points = [];
     }
@@ -63,28 +64,30 @@ class Game {
     }
 
     updateScene() {
-        if(!this.input.mousePointer.isDown && this.points.length > 0) {
-            this.collection.updateOne(
-                { 
-                    "owner_id": this.authId,
-                    "_id": this.gameId
-                },
-                {
-                    "$push": {
-                        "strokes": this.points
+        if(this.authId == this.ownerId) {
+            if(!this.input.activePointer.isDown && this.points.length > 0) {
+                this.collection.updateOne(
+                    { 
+                        "owner_id": this.authId,
+                        "_id": this.gameId
+                    },
+                    {
+                        "$push": {
+                            "strokes": this.points
+                        }
                     }
-                }
-            ).then(result => console.log(result));
-            this.points = [];
-        }
-        if(this.input.mousePointer.isDown) {
-            if(this.points.length == 0) {
-                this.path = new Phaser.Curves.Path(this.input.mousePointer.position.x - 2, this.input.mousePointer.position.y - 2);
-            } else {
-                this.path.lineTo(this.input.mousePointer.position.x - 2, this.input.mousePointer.position.y - 2);
+                ).then(result => console.log(result));
+                this.points = [];
             }
-            this.points.push([this.input.mousePointer.position.x - 2, this.input.mousePointer.position.y - 2]);
-            this.path.draw(this.graphics);
+            if(this.input.activePointer.isDown) {
+                if(this.points.length == 0) {
+                    this.path = new Phaser.Curves.Path(this.input.activePointer.position.x - 2, this.input.activePointer.position.y - 2);
+                } else {
+                    this.path.lineTo(this.input.activePointer.position.x - 2, this.input.activePointer.position.y - 2);
+                }
+                this.points.push([this.input.activePointer.position.x - 2, this.input.activePointer.position.y - 2]);
+                this.path.draw(this.graphics);
+            }
         }
     }
 
@@ -114,6 +117,7 @@ class Game {
                     "gameId": id,
                     "collection": this.collection,
                     "authId": authId,
+                    "ownerId": result.owner_id,
                     "strokes": result.strokes
                 });
             }
@@ -124,19 +128,25 @@ class Game {
     }
 
     async createGame(id, authId) {
-        let game = await this.collection.insertOne({
-            "_id": id,
-            "owner_id": authId,
-            "strokes": []
-        });
-        this.game = new Phaser.Game(this.phaserConfig);
-        this.game.scene.start("default", {
-            "gameId": id,
-            "collection": this.collection,
-            "authId": authId,
-            "strokes": []
-        });
-        return game;
+        try {
+            let game = await this.collection.insertOne({
+                "_id": id,
+                "owner_id": authId,
+                "strokes": [],
+                "solved": false
+            });
+            this.game = new Phaser.Game(this.phaserConfig);
+            this.game.scene.start("default", {
+                "gameId": id,
+                "collection": this.collection,
+                "authId": authId,
+                "ownerId": authId,
+                "strokes": []
+            });
+            return game;
+        } catch (e) {
+            console.error(e);
+        }
     }
 
 }
