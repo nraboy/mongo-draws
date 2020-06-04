@@ -143,7 +143,7 @@ class Game {
                 "ownerId": authId,
                 "strokes": []
             });
-            return game;
+            return { "gameId": id, "authId": authId, "owner_id": authId };
         } catch (e) {
             console.error(e);
         }
