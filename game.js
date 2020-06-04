@@ -35,13 +35,8 @@ class Game {
         this.graphics = this.add.graphics();
         this.graphics.lineStyle(4, 0x00aa00);
         this.strokes.forEach(stroke => {
-            for(let i = 0; i < stroke.length; i++) {
-                if(i == 0) {
-                    this.path = new Phaser.Curves.Path(stroke[0][0], stroke[0][1]);
-                } else {
-                    this.path.lineTo(stroke[i][0], stroke[i][1]);
-                }
-            }
+            this.path = new Phaser.Curves.Path();
+            this.path.fromJSON(stroke);
             this.path.draw(this.graphics);
         });
         const stream = await this.collection.watch({ "fullDocument._id": this.gameId });
@@ -51,14 +46,10 @@ class Game {
                 updatedFields = [updatedFields.strokes["0"]];
             }
             for(let strokeNumber in updatedFields) {
-                for (let i = 0; i < updatedFields[strokeNumber].length; i++) {
-                    if (i == 0) {
-                        this.path = new Phaser.Curves.Path(updatedFields[strokeNumber][0][0], updatedFields[strokeNumber][0][1]);
-                    } else {
-                        this.path.lineTo(updatedFields[strokeNumber][i][0], updatedFields[strokeNumber][i][1]);
-                    }
-                }
-                this.path.draw(this.graphics);
+                let changeStreamPath = new Phaser.Curves.Path();
+                changeStreamPath.autoClose = true;
+                changeStreamPath.fromJSON(updatedFields[strokeNumber]);
+                changeStreamPath.draw(this.graphics);
             }
         });
     }
@@ -73,15 +64,15 @@ class Game {
                     },
                     {
                         "$push": {
-                            "strokes": this.points
+                            "strokes": this.path.toJSON()
                         }
                     }
                 ).then(result => console.log(result));
                 this.points = [];
-            }
-            if(this.input.activePointer.isDown) {
+            } else if(this.input.activePointer.isDown) {
                 if(this.points.length == 0) {
                     this.path = new Phaser.Curves.Path(this.input.activePointer.position.x - 2, this.input.activePointer.position.y - 2);
+                    this.path.autoClose = true;
                 } else {
                     this.path.lineTo(this.input.activePointer.position.x - 2, this.input.activePointer.position.y - 2);
                 }
