@@ -7,15 +7,16 @@
     </head>
     <body>
         <div style="margin-bottom: 10px">
-            <input id="gameid" type="text" placeholder="Game ID" />
+            <input id="gameid" type="text" placeholder="Game ID" onkeypress="joinOrCreateGameKeyPress(event)" />
             <button id="creategame" type="button" onclick="joinOrCreateGame()">Create / Join</button>
+            <span id="ishost"></span>
         </div>
         <div id="game"></div>
         <script>
             const game = new Game({
                 "id": "game",
                 "width": 800,
-                "height": 400,
+                "height": 600,
                 "stitchAppId": "mongo-draws-zxpwa",
                 "databaseName": "mongo-draws",
                 "collectionName": "game"
@@ -27,10 +28,18 @@
                 }
                 try {
                     let auth = await game.authenticate();
-                    game.joinOrCreateGame(document.getElementById("gameid").value, auth.id);
+                    let result = await game.joinOrCreateGame(document.getElementById("gameid").value, auth.id);
+                    document.getElementById("ishost").innerHTML = auth.id == result.owner_id ? "You're the host!" : "You are not the host!";
                     document.getElementById("creategame").disabled = true;
                 } catch (e) {
                     console.error(e);
+                }
+            }
+
+            function joinOrCreateGameKeyPress(event) {
+                if(event.keyCode == 13) {
+                    joinOrCreateGame();
+                    return false;
                 }
             }
         </script>
