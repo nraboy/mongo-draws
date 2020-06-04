@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser-arcade-physics.min.js"></script>
         <script src="https://s3.amazonaws.com/stitch-sdks/js/bundles/4.6.0/stitch.js"></script>
         <script src="./game.js"></script>
     </head>
-    <body>
-        <div style="margin-bottom: 10px">
+    <body style="margin: 0">
+        <div style="position: absolute; background-color: green; padding: 10px; margin: 10px">
             <input id="gameid" type="text" placeholder="Game ID" onkeypress="joinOrCreateGameKeyPress(event)" />
             <button id="creategame" type="button" onclick="joinOrCreateGame()">Create / Join</button>
             <span id="ishost"></span>
@@ -15,8 +16,8 @@
         <script>
             const game = new Game({
                 "id": "game",
-                "width": 800,
-                "height": 600,
+                "width": window.innerWidth * window.devicePixelRatio,
+                "height": window.innerHeight * window.devicePixelRatio,
                 "stitchAppId": "mongo-draws-zxpwa",
                 "databaseName": "mongo-draws",
                 "collectionName": "game"
