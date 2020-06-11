@@ -15,7 +15,7 @@ class Game {
             }
         };
 
-        this.client = stitch.Stitch.initializeDefaultAppClient(config.stitchAppId);
+        this.client = stitch.Stitch.initializeDefaultAppClient(config.realmAppId);
         this.database = this.client.getServiceClient(stitch.RemoteMongoClient.factory, "mongodb-atlas").db(config.databaseName);
         this.collection = this.database.collection(config.collectionName);
     }
@@ -26,7 +26,7 @@ class Game {
         this.gameId = data.gameId;
         this.ownerId = data.ownerId;
         this.strokes = data.strokes;
-        this.points = [];
+        this.isDrawing = false;
     }
 
     async preloadScene() {}
@@ -56,7 +56,7 @@ class Game {
 
     updateScene() {
         if(this.authId == this.ownerId) {
-            if(!this.input.activePointer.isDown && this.points.length > 0) {
+            if(!this.input.activePointer.isDown && this.isDrawing) {
                 this.collection.updateOne(
                     { 
                         "owner_id": this.authId,
@@ -68,15 +68,14 @@ class Game {
                         }
                     }
                 ).then(result => console.log(result));
-                this.points = [];
+                this.isDrawing = false;
             } else if(this.input.activePointer.isDown) {
-                if(this.points.length == 0) {
+                if(!this.isDrawing) {
                     this.path = new Phaser.Curves.Path(this.input.activePointer.position.x - 2, this.input.activePointer.position.y - 2);
-                    this.path.autoClose = true;
+                    this.isDrawing = true;
                 } else {
                     this.path.lineTo(this.input.activePointer.position.x - 2, this.input.activePointer.position.y - 2);
                 }
-                this.points.push([this.input.activePointer.position.x - 2, this.input.activePointer.position.y - 2]);
                 this.path.draw(this.graphics);
             }
         }
@@ -123,8 +122,7 @@ class Game {
             let game = await this.collection.insertOne({
                 "_id": id,
                 "owner_id": authId,
-                "strokes": [],
-                "solved": false
+                "strokes": []
             });
             this.game = new Phaser.Game(this.phaserConfig);
             this.game.scene.start("default", {

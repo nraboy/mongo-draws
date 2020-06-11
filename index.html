@@ -26,7 +26,7 @@
                 "id": "game",
                 "width": window.innerWidth,
                 "height": window.innerHeight,
-                "stitchAppId": "mongo-draws-zxpwa",
+                "realmAppId": "mongo-draws-zxpwa",
                 "databaseName": "mongo-draws",
                 "collectionName": "game"
             });
@@ -36,9 +36,8 @@
                     return alert("The Game ID Must Not Be Empty");
                 }
                 try {
-                    let auth = await game.authenticate();
-                    let result = await game.joinOrCreateGame(document.getElementById("gameid").value, auth.id);
-                    document.getElementById("ishost").innerHTML = auth.id == result.owner_id ? "You're the host!" : "You are not the host!";
+                    let result = await game.joinOrCreateGame(document.getElementById("gameid").value);
+                    document.getElementById("ishost").innerHTML = result.authId == result.owner_id ? "You're the host!" : "You are not the host!";
                     document.getElementById("visitor").style.display = "none";
                     document.getElementById("information").innerHTML = "Game ID: " + document.getElementById("gameid").value;
                     document.getElementById("information").style.display = "block";

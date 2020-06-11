@@ -2,6 +2,8 @@
 
 This is an example project that leverages MongoDB Atlas, MongoDB Stitch, and the Phaser gaming framework. The idea is to be a drawing game where brush strokes are stored to MongoDB and synchronize to all the connected clients in near real-time for an interactive gaming experience.
 
+![](mongo-draws-v1.gif "")
+
 ## Configuring the Project
 
 To use your own instance of MongoDB, some values must be changed within the **index.html** file. Open the file and search for the following:
